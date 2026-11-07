@@ -1,13 +1,41 @@
 [
   {
     "name": "week",
-    "title": "This week",
-    "subtitle": "Test Data Masking for Claude Code: what needs attention, rendered by npm run view",
+    "title": "Masking review this week",
+    "subtitle": "Recorded evidence, not permission to release data",
     "sections": [
       {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
+        "title": "Runs and reviewer decisions",
+        "sql": "SELECT name,environment,revision,current_revision,row_count,decision,blockers,retention_due FROM run_register ORDER BY created_at DESC",
+        "note": "Run readiness before use. This register shows recorded decisions and revisions, not current rule equivalence."
+      },
+      {
+        "title": "Field treatment",
+        "sql": "SELECT * FROM rule_coverage ORDER BY object_name"
+      }
+    ]
+  },
+  {
+    "name": "attention",
+    "title": "Work needing attention",
+    "sections": [
+      {
+        "title": "Follow-up register",
+        "sql": "SELECT * FROM attention ORDER BY kind,item"
+      },
+      {
+        "title": "Retained fields needing inspection",
+        "sql": "SELECT object_name,field_name,reason FROM field_rules WHERE action='keep'"
+      }
+    ]
+  },
+  {
+    "name": "retention",
+    "title": "Test copy retention review",
+    "sections": [
+      {
+        "title": "Purpose, owner and review date",
+        "sql": "SELECT name,owner,purpose,retention_due,days_left,runs,stored_rows FROM retention_review ORDER BY retention_due"
       }
     ]
   }

@@ -1,11 +1,50 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
+    "name": "masking-evidence",
+    "title": "Masking evidence report",
+    "for_each": "SELECT id,name FROM runs ORDER BY created_at",
     "file": "name",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      {
+        "title": "Run summary",
+        "layout": "record",
+        "sql": "SELECT name,revision,row_count,actor,created_at,source_hash,policy_hash FROM runs WHERE id=$1"
+      },
+      {
+        "title": "Processed objects",
+        "sql": "SELECT object_name,row_count,columns FROM datasets WHERE run_id=$1 ORDER BY object_name"
+      },
+      {
+        "title": "Rule snapshot",
+        "sql": "SELECT p->>'object_name' AS object,p->>'field_name' AS field,p->>'action' AS action,p->>'domain' AS domain,p->>'reason' AS reason FROM runs,jsonb_array_elements(policy) p WHERE id=$1"
+      },
+      {
+        "title": "Review decisions",
+        "sql": "SELECT reviewer,decision,evidence,created_at FROM reviews WHERE run_id=$1 ORDER BY created_at",
+        "note": "A recorded acceptance is not proof of anonymity. Check current readiness and inspect kept fields before release."
+      }
+    ]
+  },
+  {
+    "name": "handover",
+    "title": "Test copy handover draft",
+    "for_each": "SELECT id,name FROM environments",
+    "file": "name",
+    "sections": [
+      {
+        "title": "Purpose and retention",
+        "layout": "record",
+        "sql": "SELECT name,owner,purpose,revision,retention_due FROM environments WHERE id=$1"
+      },
+      {
+        "title": "Masking history",
+        "sql": "SELECT name,revision,row_count,created_at FROM runs WHERE environment_id=$1 ORDER BY created_at DESC"
+      },
+      {
+        "title": "Exceptions",
+        "sql": "SELECT name,owner,due,status,resolution FROM issues WHERE environment_id=$1 ORDER BY due",
+        "note": "No access is granted and no data is sent by this draft."
+      }
     ]
   }
 ]

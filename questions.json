@@ -1,0 +1,42 @@
+[
+  {
+    "question": "Which refreshes have no masking run yet?",
+    "command": "attention"
+  },
+  {
+    "question": "Which runs were reviewed against rules we have since changed?",
+    "command": "readiness"
+  },
+  {
+    "question": "Which copies have passed their retention review date?",
+    "command": "retention"
+  },
+  {
+    "question": "Which fields are deliberately kept and why?",
+    "command": "kept-fields"
+  },
+  {
+    "question": "Who has unresolved work before a test copy can be accepted?",
+    "command": "issues"
+  },
+  {
+    "question": "How many fields are erased, replaced or kept for each object?",
+    "command": "coverage"
+  },
+  {
+    "question": "Which run contains each imported object and how many records?",
+    "command": "datasets"
+  },
+  {
+    "question": "Who accepted or rejected each run and what evidence did they record?",
+    "command": "reviews"
+  },
+  {
+    "question": "Which test purposes and owners sit behind stored copies?",
+    "command": "environments"
+  },
+  {
+    "question": "Who changed the rules or recorded a refresh?",
+    "command": "activity"
+  }
+]

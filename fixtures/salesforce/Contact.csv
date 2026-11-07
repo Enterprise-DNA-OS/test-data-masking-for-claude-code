@@ -1,0 +1,4 @@
+Id,AccountId,FirstName,LastName,Email,Phone,Description
+003DEMO001,001DEMO001,Casey,Demo,casey@example.invalid,000000003,"Fictional demo, no real customer"
+003DEMO002,001DEMO001,Jordan,Demo,jordan@example.invalid,000000004,"Invented note"
+003DEMO003,001DEMO002,Alex,Sample,alex@example.invalid,000000005,"Training only"

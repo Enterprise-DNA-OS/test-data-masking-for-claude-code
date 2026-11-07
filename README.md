@@ -1,115 +1,122 @@
-<h1 align="center">Test Data Masking for Claude Code</h1>
+# Test Data Masking for Claude Code
 
-<p align="center">
-  <strong>The open-source test data masking desk that is just a database and Claude Code.</strong>
-</p>
+Turn exported Salesforce records into test copies with explicit field rules, a review trail and a named owner. Keep the masking rules and evidence in a database you own.
 
-<p align="center">
-  Created by <a href="https://www.enterprisedna.co"><strong>Enterprise DNA</strong></a>. Free and open source. Works with Claude Code, Codex, OpenCode or Cursor.
-</p>
+## Three ways to own it
 
-<!-- three-doors -->
-<table align="center">
-  <tr>
-    <td align="center"><strong>Do it yourself</strong><br/>Clone it, run it, own it. Free, MIT.<br/><a href="#quick-start">Quick start</a></td>
-    <td align="center"><strong>We customise it</strong><br/>Your fields, your rules, your Cloud Compliance DataMasker data brought across.<br/><a href="https://enterprisedna.co/omni/book/?utm_source=github&utm_medium=readme&utm_campaign=cloud-compliance-datamasker">Book a call</a></td>
-    <td align="center"><strong>We run it for you</strong><br/>Installed, connected and operated inside Omni. Setup fee, then a retainer.<br/><a href="https://enterprisedna.co/omni/instead-of/cloud-compliance-datamasker?utm_source=github&utm_medium=readme&utm_campaign=cloud-compliance-datamasker">How it works</a></td>
-  </tr>
-</table>
+- **Do it yourself:** use the MIT-licensed base with Claude Code, Codex, OpenCode or Cursor. Hosting and your coding agent are separate costs.
+- **We customise it:** Enterprise DNA maps your fields and rules, brings your exported records across, and adds your connections, a web front end or another stack where needed. One setup fee, then a retainer.
+- **We run it for you:** Omni by Enterprise DNA installs and operates your version, manages access and backups, and keeps the review process working. One setup fee, then a retainer.
 
-<p align="center">
-  <a href="#what-is-this">What is this</a> &bull;
-  <a href="#why-no-front-end">Why no front end</a> &bull;
-  <a href="#quick-start">Quick start</a> &bull;
-  <a href="#the-commands">Commands</a> &bull;
-  <a href="#instead-of-cloud-compliance-datamasker">Instead of Cloud Compliance DataMasker</a> &bull;
-  <a href="#want-it-installed-and-run-for-you">Installed for you</a> &bull;
-  <a href="#license">License</a>
-</p>
+[Book a 30-minute call with Sam](https://enterprisedna.co/omni/book/?offer=replace-software&utm_source=github&utm_medium=readme&utm_campaign=cloud-compliance-datamasker).
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Node-20+-339933?style=flat-square" alt="Node 20+" />
-  <img src="https://img.shields.io/badge/PostgreSQL-any-336791?style=flat-square" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/PGlite-embedded-3ecf8e?style=flat-square" alt="PGlite" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT License" />
-</p>
+## The subscription being compared
 
----
+Cloud Compliance's [pricing page](https://cloudcompliance.app/pricing), checked 7 November 2026, lists DataMasker at $6.99 per user monthly with a $19,999 annual minimum. The page does not specify currency. Other vendor pages show different figures. Confirm a current quote. This is a published minimum, not evidence of an Enterprise DNA customer's invoice.
 
-## What is this
+## Try the synthetic demo
 
-Test Data Masking for Claude Code does the job you pay Cloud Compliance DataMasker for, as a Postgres database and a set of agent commands. There is no web front end. You open the folder in [Claude Code](https://claude.com/claude-code) (or Codex, OpenCode, Cursor: see `AGENTS.md`) and ask for what you want in plain language. It runs the right query, and it can answer questions the Cloud Compliance DataMasker dashboard cannot.
+Node 20 or newer. No cloud account is required.
 
-<!-- TODO(author): the annual bill. One sentence: what a 10 to 50 person business typically pays Cloud Compliance DataMasker per year, all in, with a source. -->
-
-Want the same thing with a web front end, or built on a different stack? That is a customisation, and it is exactly what Enterprise DNA does: [book a call](https://enterprisedna.co/omni/book/?utm_source=github&utm_medium=readme&utm_campaign=cloud-compliance-datamasker).
-
-<!-- TODO(author): two or three sentences on what this specific product covers and who it is for. -->
-
-## Why no front end
-
-- The front end was only ever there because the database was hard to talk to. That is no longer true.
-- Your data sits in plain Postgres tables you own. Any tool can read them. No export, no lock-in.
-- No seats, no tiers, no add-ons. Read [docs/why-no-front-end.md](docs/why-no-front-end.md) for the honest trade-offs too.
-
-## Quick start
-
-Sixty seconds, no database install (an embedded Postgres runs inside Node):
-
-```bash
-git clone https://github.com/Enterprise-DNA-OS/test-data-masking-for-claude-code.git
-cd test-data-masking-for-claude-code
+```sh
 npm install
+npm test
 npm run demo
+npm run masking -- attention
+npm run masking -- readiness --json
+npm run view
+npm run docs
 ```
 
-Then open the folder in Claude Code and type a slash command. <!-- TODO(author): name the first command to try. -->
+The repeatable demo has three test environments, two five-record masking runs, an expired review date, an overdue exception and an environment with no run. All source records are invented. Use a separate empty DATA_DIR for real work. DATABASE_URL selects PostgreSQL, otherwise the local PGlite database lives under .data/db.
 
-### Use it with your own Postgres or Supabase
+## What the desk does
 
-Copy `.env.example` to `.env`, set `DATABASE_URL`, then `npm run migrate`. Same commands, shared data, no per-seat fee.
+Every imported column needs a rule. Erase blanks a value, token replaces it with a random identifier, email produces an address under example.invalid, and keep copies a value with a recorded justification. Matching source values in the same token domain share a replacement within one batch, so Account.Id and Contact.AccountId stay related when their rules share a domain. New runs generate new replacements. There is no reverse lookup store.
 
-## The commands
+Import accepts a directory of Salesforce object CSV files. It checks unique nonempty Id values per object and rejects malformed files or unclassified fields before writing. A whole directory is one transaction. Repeating the identical batch under the same refresh and rules is a no-op. Raw source values are handled in memory and are not stored, except values deliberately copied by keep rules. Input files and operating-system memory remain the operator's responsibility.
 
-<!-- TODO(author): a table of the slash commands in .claude/commands and what each one does. -->
+Runs store counts, source hashes and the exact rules used. Reviews require another operator label and a source evidence reference. Changed rules, a new refresh, an expired retention date or open exceptions prevent acceptance. Readiness recalculates those conditions for earlier decisions. It does not inspect access controls or certify anonymity.
 
-| Command | What it does |
-|---|---|
-| `/...` | ... |
+This is a trusted local operator tool. Row-level security and revoked PUBLIC privileges restrict default database access. Database owners can bypass controls. Actor labels are not authenticated identities. Real deployments need access controls, encrypted storage and backups appropriate to their data.
 
-## Instead of Cloud Compliance DataMasker
+## Recurring jobs
 
-<!-- TODO(author): how to bring data across from Cloud Compliance DataMasker; link docs/replace-cloud-compliance-datamasker.md -->
+- `/environments`: List test purposes, owners, refresh revisions and retention dates.
+- `/rules`: Read every configured field treatment and reason.
+- `/coverage`: Count kept, erased and replaced fields by object.
+- `/runs`: Read the masking run register.
+- `/datasets`: Reconcile processed objects and row counts.
+- `/attention`: Review overdue work, unmasked refreshes and unreviewed runs.
+- `/retention`: Review test-copy purpose and expiry.
+- `/issues`: Read the exception register.
+- `/reviews`: Read decisions and evidence references.
+- `/activity`: Read the change record.
+- `/kept-fields`: Inspect fields deliberately copied unchanged.
+- `/readiness`: Recheck refresh, rules, retention, exceptions and review decisions.
+- `/compliance`: Read record checks with the rules and limits in docs/compliance.md.
+- `/run`: Read a run, its policy snapshot and reviews.
+- `/add-environment`: Register an authorised test purpose, owner and retention review date.
+- `/set-rule`: Set an explicit treatment for a field. A changed rule invalidates prior acceptance.
+- `/refresh`: Record a fresh source copy and invalidate earlier review decisions.
+- `/import`: Read docs/replace-cloud-compliance-datamasker.md, inspect headers without displaying raw values, test first, reconcile counts.
+- `/review`: Inspect the actual masked output, kept fields and relationship consistency before recording the requested decision. Reviewer must differ from importer.
+- `/log-issue`: Record an exception that blocks acceptance for this environment.
+- `/close-issue`: Close only with operator-provided resolution evidence.
+- `/export`: Write a complete private snapshot to a new file. Kept fields still require protection.
+- `/export-csv`: Write masked objects to a new directory for inspection. Never load them into a live system.
+- `/weekly-review`: Draft the weekly review from readiness, attention and compliance.
+- `/draft-handover`: Draft a named environment handover without sending or granting access.
+- `/help`: Show supported commands and flags.
+- `/customise`: add a field or change a rule through a tested migration.
+- `/new-view`: build another read-only report.
 
-## Architecture
+All CLI commands support --json, case-insensitive name matching and partial IDs. Ambiguous names list matches and exit 1. Run help for exact flags.
 
-```
-test-data-masking-for-claude-code/
-  CLAUDE.md                 how the operator wants this run (routing table + house rules)
-  AGENTS.md                 the same, for Codex / OpenCode / Cursor / Gemini CLI
-  .claude/commands/         the slash commands
-  scripts/                  the CLI the commands drive
-  scripts/lib/db.mjs        one adapter: DATABASE_URL (pg) or embedded PGlite
-  supabase/migrations/      plain SQL schema
-  supabase/seed.sql         demo data
-  docs/                     the thesis and the migration guide
-```
+## Ten questions to ask your records
 
-## Built for coding agents
+1. Which refreshes have no masking run yet? (`attention`)
+2. Which runs were reviewed against rules we have since changed? (`readiness`)
+3. Which copies have passed their retention review date? (`retention`)
+4. Which fields are deliberately kept and why? (`kept-fields`)
+5. Who has unresolved work before a test copy can be accepted? (`issues`)
+6. How many fields are erased, replaced or kept for each object? (`coverage`)
+7. Which run contains each imported object and how many records? (`datasets`)
+8. Who accepted or rejected each run and what evidence did they record? (`reviews`)
+9. Which test purposes and owners sit behind stored copies? (`environments`)
+10. Who changed the rules or recorded a refresh? (`activity`)
 
-The database, CLI and command recipes work with Claude Code, Codex, OpenCode or Cursor. Ask your coding agent for a new command and have it implement and test the change against the same records.
+These analyses run today. They are not a claim that no vendor report can answer the same question. Cross-run rules and your own review process make the answers specific to your business.
 
-## Contributing
+## Your first hour: ten things to ask for
 
-Issues and pull requests are welcome. Keep the shape: plain SQL, a small CLI, a slash command per recurring job, no front end.
+1. Put our name and colours in brand.json.
+2. Show copies whose retention review is overdue.
+3. Show all fields copied unchanged and their reasons.
+4. List the fields in an export without showing personal values.
+5. Draft explicit masking rules for those fields.
+6. Test an import before storing transformed copies.
+7. Reconcile source and imported object counts.
+8. Inspect relationship consistency in the transformed records.
+9. Draft the Monday review and a handover.
+10. Add a project field with a migration and test it.
 
-## Want it installed and run for you?
+## Switching and operating
 
-Enterprise DNA installs Test Data Masking for Claude Code for your business, migrates your Cloud Compliance DataMasker data, connects it to the rest of your tools, and runs it for you as part of **Omni**, our managed Command Center. One setup fee, then a monthly retainer.
+[The replace guide](docs/replace-cloud-compliance-datamasker.md) describes the one-command CSV import. It brings the Salesforce records DataMasker operates on, not its proprietary package configuration, historical jobs or native automation. Rules must be mapped first. Exported Account and Contact files are provided as synthetic format fixtures, not a licensed-account export.
 
-- Book a call: [enterprisedna.co/omni/book](https://enterprisedna.co/omni/book/?offer=replace-software&utm_source=github&utm_medium=readme&utm_campaign=cloud-compliance-datamasker)
-- Read more: [enterprisedna.co/omni/instead-of/cloud-compliance-datamasker](https://enterprisedna.co/omni/instead-of/cloud-compliance-datamasker?utm_source=github&utm_medium=readme&utm_campaign=cloud-compliance-datamasker)
+The base works on local CSV copies. It does not mask a live Salesforce sandbox, mute Salesforce automation, migrate attachments, preserve Salesforce-compatible record IDs or restore files to Salesforce. Enterprise DNA can scope these integrations into your version. Do not retire a native masking tool until your actual workflows and controls have been replaced and checked.
 
-## License
+npm run docs creates per-run masking evidence and per-environment handover documents in your brand. npm run view creates week, attention and retention pages. weekly-review and draft-handover write private Markdown drafts. Files are read-only outputs, with no send or grant-access action.
 
-MIT. Copyright (c) 2026 Enterprise DNA.
+export produces a complete JSON snapshot of operational records, rules, masked values and evidence. export-csv writes transformed object files to a new directory. Neither overwrites an existing output. Use native database backups for restoration and test your restore procedure. Retention checks never erase data. Disposal of source files, transformed copies and backups remains a reviewed operation.
+
+## Validation
+
+npm test uses a disposable database and output directory. It tests every CLI command, masking relationships, no raw persistence, invalid imports, repeated imports, evidence gates, changed rules, refresh invalidation, ambiguity, HTML escaping and document generation. CI covers Node 20 and 22 on Windows and Ubuntu, plus PostgreSQL on Ubuntu. Configured CI is not a claim of a completed Windows run. See GitHub Actions for results.
+
+[Compliance](docs/compliance.md) explains legal sources and house controls. [Why no front end](docs/why-no-front-end.md) explains the local workflow. [Research](docs/research.md) records the selection evidence.
+
+## Licence
+
+MIT. Copyright 2026 Enterprise DNA. Independent software, not affiliated with Cloud Compliance or Salesforce. No vendor code or assets are included.
